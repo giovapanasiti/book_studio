@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Book } from '../types';
-import { PAGE_SIZES, MM_TO_PX, fontStack } from '../types';
+import { PAGE_SIZES, MM_TO_PX, fontStack, locTOC, locChapter } from '../types';
 import { api } from '../api';
 import { renderMarkdown } from '../lib/markdown';
 import { paginate } from '../lib/paginate';
@@ -70,7 +70,7 @@ export function PreviewView({ book }: { book: Book }) {
         html = html.replace(/^\s*<h1[^>]*>[\s\S]*?<\/h1>/, '');
         const open =
           `<div class="chapter-open">` +
-          (s.chapterNumbering ? `<p class="num">Chapter ${i + 1}</p>` : '') +
+          (s.chapterNumbering ? `<p class="num">${locChapter(book.language)} ${i + 1}</p>` : '') +
           `<h1>${escapeHTML(ch.title)}</h1><div class="rule"></div></div>`;
         const chunks = await paginate(open + html, {
           colWidthPx: colW,
@@ -149,7 +149,7 @@ export function PreviewView({ book }: { book: Book }) {
                     className="book-typo"
                     style={{ ...(cssVars as React.CSSProperties), position: 'absolute', inset: `${padT}px ${padR}px ${padB}px ${padL}px` }}
                   >
-                    <h1 style={{ margin: '8% 0 1.4em' }}>Contents</h1>
+                    <h1 style={{ margin: '8% 0 1.4em' }}>{locTOC(book.language)}</h1>
                     {book.chapters.map((ch) => (
                       <div key={ch.id} style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: '0.6em' }}>
                         <span>{ch.title}</span>

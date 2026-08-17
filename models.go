@@ -110,6 +110,38 @@ type Book struct {
 	Cover       Cover     `json:"cover"`
 }
 
+// LocTOC returns the table-of-contents title for the book language.
+func LocTOC(lang string) string {
+	switch {
+	case len(lang) >= 2 && lang[:2] == "it":
+		return "Indice"
+	case len(lang) >= 2 && lang[:2] == "fr":
+		return "Table des matières"
+	case len(lang) >= 2 && lang[:2] == "es":
+		return "Índice"
+	case len(lang) >= 2 && lang[:2] == "de":
+		return "Inhalt"
+	default:
+		return "Contents"
+	}
+}
+
+// LocChapter returns the chapter label for the book language.
+func LocChapter(lang string) string {
+	switch {
+	case len(lang) >= 2 && lang[:2] == "it":
+		return "Capitolo"
+	case len(lang) >= 2 && lang[:2] == "fr":
+		return "Chapitre"
+	case len(lang) >= 2 && lang[:2] == "es":
+		return "Capítulo"
+	case len(lang) >= 2 && lang[:2] == "de":
+		return "Kapitel"
+	default:
+		return "Chapter"
+	}
+}
+
 // PageSizeMM returns width and height in millimeters for a page size name.
 func PageSizeMM(name string) (float64, float64) {
 	switch name {

@@ -860,7 +860,7 @@ func (e *engine) renderTOC() {
 	o.color = e.s.HeadingColor
 	o.spaceAfter = 8
 	e.y += 10
-	e.writePara(wordsFromRuns([]seg{{text: "Contents"}}), o)
+	e.writePara(wordsFromRuns([]seg{{text: LocTOC(e.b.Language)}}), o)
 
 	body := e.bodyOpts()
 	lh := body.lineH * 1.25
@@ -916,7 +916,7 @@ func (e *engine) renderChapter(i int, ch Chapter, src []byte) {
 		o.lineH = o.size * ptToMm * 1.4
 		o.color = e.s.AccentColor
 		o.spaceAfter = 3
-		e.writePara(wordsFromRuns([]seg{{text: strings.ToUpper(fmt.Sprintf("Chapter %d", i+1))}}), o)
+		e.writePara(wordsFromRuns([]seg{{text: strings.ToUpper(fmt.Sprintf("%s %d", LocChapter(e.b.Language), i+1))}}), o)
 	}
 	to := e.bodyOpts()
 	to.justify = false

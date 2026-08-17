@@ -230,7 +230,7 @@ func WriteEPUB(projectDir string, b *Book, target string) error {
 		}
 		body := ""
 		if b.Styles.ChapterNumbering {
-			body += fmt.Sprintf(`<p class="chapter-number">Chapter %d</p>`+"\n", i+1)
+			body += fmt.Sprintf(`<p class="chapter-number">%s %d</p>`+"\n", LocChapter(lang), i+1)
 		}
 		body += `<div class="chapter">` + "\n" + buf.String() + "\n</div>"
 		name := fmt.Sprintf("chap-%03d.xhtml", i+1)
@@ -289,8 +289,8 @@ func WriteEPUB(projectDir string, b *Book, target string) error {
 	}
 
 	// Navigation document.
-	nav := fmt.Sprintf(`<nav epub:type="toc" id="toc"><h1>Contents</h1><ol>%s</ol></nav>`, strings.Join(navEntries, "\n"))
-	if err := add("OEBPS/nav.xhtml", xhtmlDoc("Contents", lang, nav)); err != nil {
+	nav := fmt.Sprintf(`<nav epub:type="toc" id="toc"><h1>%s</h1><ol>%s</ol></nav>`, LocTOC(lang), strings.Join(navEntries, "\n"))
+	if err := add("OEBPS/nav.xhtml", xhtmlDoc(LocTOC(lang), lang, nav)); err != nil {
 		return err
 	}
 

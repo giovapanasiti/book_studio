@@ -332,6 +332,17 @@ export const PAGE_SIZES: Record<string, { w: number; h: number; label: string }>
 
 export const MM_TO_PX = 96 / 25.4;
 
+// Localized labels for generated book matter; keep in sync with the Go side.
+export function locTOC(lang: string): string {
+  const l = (lang || '').slice(0, 2);
+  return { it: 'Indice', fr: 'Table des matières', es: 'Índice', de: 'Inhalt' }[l] ?? 'Contents';
+}
+
+export function locChapter(lang: string): string {
+  const l = (lang || '').slice(0, 2);
+  return { it: 'Capitolo', fr: 'Chapitre', es: 'Capítulo', de: 'Kapitel' }[l] ?? 'Chapter';
+}
+
 export function fontStack(name: string): string {
   switch (name) {
     case 'sans':
