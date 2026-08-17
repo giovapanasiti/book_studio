@@ -1,0 +1,175 @@
+{
+  "audience": "adult",
+  "characters": [
+    {
+      "age": "41",
+      "appearance": "Wind-cut, salt-grey braid, hands scarred by brass polish. Wears her grandfather's coat with the sleeves turned twice.",
+      "arc": "From keeper of records to author of her own entry.",
+      "backstory": "Eleven years on the rock; before that, optics school on the mainland.",
+      "id": "char-elena",
+      "motivation": "Wants: keep the light perfect. Needs: let one imperfect person in.",
+      "name": "Elena Ferrán",
+      "notes": "",
+      "occupation": "Lighthouse keeper at Punta Serena",
+      "personality": "Precise, dry, secretly sentimental about instruments.",
+      "portrait": "marbled-paper.png",
+      "pronouns": "she/her",
+      "relationships": [
+        {
+          "label": "slow-burn love interest",
+          "withId": "char-marco"
+        }
+      ],
+      "role": "protagonist",
+      "secret": "She has never once written her own name in the logbook.",
+      "voice": "Short sentences. Nautical vocabulary for feelings.",
+      "wound": "Her predecessor — her grandfather — died on the stairs while she was away at school."
+    },
+    {
+      "age": "44",
+      "appearance": "Forearms like bollards, flour on his collar, laughs before he speaks.",
+      "arc": "From visitor to co-keeper.",
+      "backstory": "Third-generation boatwright of the village below.",
+      "id": "char-marco",
+      "motivation": "Wants: an excuse to climb the ninety-two steps. Needs: to be needed for more than bread.",
+      "name": "Marco Bellandi",
+      "notes": "",
+      "occupation": "Boatwright, delivers bread on Thursdays",
+      "personality": "Patient, talkative, keeps every promise smaller than he can deliver.",
+      "portrait": "",
+      "pronouns": "he/him",
+      "relationships": [
+        {
+          "label": "brings her bread, and stays",
+          "withId": "char-elena"
+        }
+      ],
+      "role": "love-interest",
+      "secret": "He has read every public logbook entry Elena ever wrote.",
+      "voice": "Long sentences that end in questions.",
+      "wound": "A boat he built failed in the '19 storm. No one blamed him; he does."
+    }
+  ],
+  "genre": "quiet romance",
+  "locations": [
+    {
+      "description": "Ninety-two steps, brass and whitewash, the first-order Fresnel lens at the crown.",
+      "id": "loc-tower",
+      "image": "lighthouse.png",
+      "kind": "lighthouse",
+      "name": "Punta Serena lighthouse",
+      "notes": "",
+      "significance": "The whole story climbs these stairs. The lens is the third character."
+    },
+    {
+      "description": "One bakery, one slipway, weather talked about like family.",
+      "id": "loc-village",
+      "image": "",
+      "kind": "fishing village",
+      "name": "The village below",
+      "notes": "",
+      "significance": "What Elena watches from above and never visits."
+    }
+  ],
+  "logline": "A solitary lighthouse keeper who trusts glass more than people must let the village boatwright into her tower — and her ledger of a life — before the great lens, and her certainty, crack for good.",
+  "notes": [
+    {
+      "category": "research",
+      "content": "First-order: ~2.6 m tall, 920 mm focal length. Cleaning: chamois only on prisms, never rouge on glass — rouge is for the brass ring.",
+      "id": "note-1",
+      "title": "Fresnel lens orders"
+    },
+    {
+      "category": "idea",
+      "content": "Everyone who matters signs the logbook. Elena never has. The romance resolves when she does.",
+      "id": "note-2",
+      "title": "Motif: signatures"
+    }
+  ],
+  "outline": {
+    "ch-1": {
+      "pov": "char-elena",
+      "status": "done",
+      "synopsis": "Establish Elena's ritual; Marco stays for the fog. The logbook motif opens.",
+      "targetWords": 2500
+    },
+    "ch-2": {
+      "pov": "char-elena",
+      "status": "revising",
+      "synopsis": "Spring tides; the storm cracks a prism; she must ask for help.",
+      "targetWords": 2500
+    },
+    "ch-3": {
+      "pov": "char-marco",
+      "status": "draft",
+      "synopsis": "The repair, hand in hand. She signs her name.",
+      "targetWords": 2200
+    }
+  },
+  "styleSheet": [
+    {
+      "id": "st-1",
+      "rule": "one word, lower-case",
+      "term": "logbook"
+    },
+    {
+      "id": "st-2",
+      "rule": "never abbreviated; the villagers say 'the Punta'",
+      "term": "Punta Serena"
+    },
+    {
+      "id": "st-3",
+      "rule": "always spelled out, always hyphenated",
+      "term": "ninety-two steps"
+    }
+  ],
+  "synopsis": "Elena keeps the light and the logbook. Marco brings the bread on Thursdays and stays a little longer every week. When the March storm damages the Fresnel lens, they must repair it together before the spring convoys pass the headland. The work forces her to speak; the silence forces him to listen. The light holds. So does the argument with the dark.",
+  "targetWords": 60000,
+  "theme": "Tending something old and fragile — a lens, a heart — is the same discipline.",
+  "threads": [
+    {
+      "id": "th-main",
+      "kind": "main",
+      "premise": "Storm damage threatens the light before the convoys pass.",
+      "resolution": "Repaired by hand, together, the old way.",
+      "stakes": "Ships on the headland; the end of the keeper's post.",
+      "status": "active",
+      "title": "The lens must survive the spring tides"
+    },
+    {
+      "id": "th-romance",
+      "kind": "romance",
+      "premise": "Thursday bread becomes Thursday repairs becomes Thursdays.",
+      "resolution": "He signs the logbook as witness; she signs her name.",
+      "stakes": "Her solitude; his guilt.",
+      "status": "active",
+      "title": "Elena and Marco"
+    }
+  ],
+  "timeline": [
+    {
+      "description": "Weeks after her grandfather's death.",
+      "id": "tl-1",
+      "title": "Elena takes the post",
+      "when": "Eleven years ago"
+    },
+    {
+      "description": "Marco stays for the fog.",
+      "id": "tl-2",
+      "title": "First bread delivery of March",
+      "when": "Ch. 1, Thursday"
+    },
+    {
+      "description": "North face, third course.",
+      "id": "tl-3",
+      "title": "The storm cracks a prism",
+      "when": "Ch. 2, spring tides"
+    },
+    {
+      "description": "Chamois, rouge, and talk. She signs the logbook.",
+      "id": "tl-4",
+      "title": "The repair",
+      "when": "Ch. 3"
+    }
+  ]
+}

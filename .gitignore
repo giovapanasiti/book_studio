@@ -1,0 +1,32 @@
+# Build output
+build/bin/
+
+# Frontend
+node_modules/
+frontend/dist/
+frontend/wailsjs/
+frontend/package.json.md5
+
+# Go
+*.test
+*.out
+
+# Editors and OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# makepkg artifacts
+/src/
+/pkg/
+/gobin/
+*.pkg.tar.zst
+*.pkg.tar.xz
+
+# stray go build output at repo root
+/book-studio

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Book Studio
+GenericName=Book and Magazine Designer
+Comment=Write, design and export books and magazines as PDF and ePub
+Exec=book-studio
+Icon=book-studio
+Terminal=false
+Categories=Office;Publishing;Graphics;
+Keywords=book;magazine;writing;markdown;epub;pdf;publishing;
