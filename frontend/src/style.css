@@ -29,6 +29,12 @@
 
 html, body, #root { height: 100%; }
 
+html {
+  /* Form controls (select popups, scrollbars, pickers) must render dark:
+     without this the engine draws them light and the pale text disappears. */
+  color-scheme: dark;
+}
+
 body {
   font-family: var(--ui);
   font-size: 13px;
@@ -354,7 +360,15 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 }
 .text-input:hover, .select-input:hover { border-color: var(--ink-700); }
 textarea.text-input { resize: vertical; min-height: 56px; line-height: 1.5; }
-.select-input option { background: var(--ink-850); }
+select option,
+select optgroup {
+  background: var(--ink-850);
+  color: var(--text);
+}
+select option:checked {
+  background: var(--ink-700);
+  color: var(--brass-bright);
+}
 
 .num-input { width: 64px; }
 
