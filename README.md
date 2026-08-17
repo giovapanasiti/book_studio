@@ -6,7 +6,22 @@ export a print-ready PDF and an ePub.
 
 Built with [Wails v2](https://wails.io) (Go backend) and React + TypeScript (frontend).
 
-![Book Studio](build/appicon.png)
+## Screenshots
+
+*Write: markdown chapters with a live preview.*
+![Write view](docs/screenshots/write.jpg)
+
+*Preview: the whole book paginated as it will print — cover, title page, contents, drop caps and folios.*
+![Preview view](docs/screenshots/preview.jpg)
+
+*Cover: a freeform editor with text, images, shapes and every font installed on your system.*
+![Cover editor](docs/screenshots/cover.jpg)
+
+*Story bible: characters with arcs and relationships, world, plot threads, timeline and outline.*
+![Story bible](docs/screenshots/bible.jpg)
+
+*Design: page, typography and front matter, with a live specimen page.*
+![Design view](docs/screenshots/design.jpg)
 
 ## Features
 
