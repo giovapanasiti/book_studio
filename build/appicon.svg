@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2e2a24"/>
+      <stop offset="1" stop-color="#141210"/>
+    </linearGradient>
+    <linearGradient id="pageL" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f4efe2"/>
+      <stop offset="0.85" stop-color="#e6dfcc"/>
+      <stop offset="1" stop-color="#cfc7b0"/>
+    </linearGradient>
+    <linearGradient id="pageR" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#cfc7b0"/>
+      <stop offset="0.15" stop-color="#e6dfcc"/>
+      <stop offset="1" stop-color="#f4efe2"/>
+    </linearGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8c26a"/>
+      <stop offset="1" stop-color="#9c752c"/>
+    </linearGradient>
+    <linearGradient id="ribbon" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#deb75f"/>
+      <stop offset="1" stop-color="#b18936"/>
+    </linearGradient>
+  </defs>
+
+  <!-- background tile -->
+  <rect x="6" y="6" width="500" height="500" rx="112" fill="url(#bg)"/>
+  <rect x="18" y="18" width="476" height="476" rx="100" fill="none"
+        stroke="#c8a24b" stroke-opacity="0.22" stroke-width="3"/>
+
+  <!-- brass cover under the pages -->
+  <path fill="url(#brass)" d="M256,168
+      C216,138 156,132 84,148
+      L84,384
+      C156,368 216,374 256,404
+      C296,374 356,368 428,384
+      L428,148
+      C356,132 296,138 256,168 Z"/>
+
+  <!-- left page -->
+  <path fill="url(#pageL)" d="M250,178
+      C214,152 162,146 100,160
+      L100,368
+      C162,354 214,360 250,386 Z"/>
+  <!-- right page -->
+  <path fill="url(#pageR)" d="M262,178
+      C298,152 350,146 412,160
+      L412,368
+      C350,354 298,360 262,386 Z"/>
+
+  <!-- center crease shadow -->
+  <path fill="#3a352c" fill-opacity="0.35" d="M250,178 L250,386 L256,392 L262,386 L262,178 L256,173 Z"/>
+
+  <!-- text lines, left page -->
+  <g stroke="#a89e87" stroke-width="9" stroke-linecap="round" stroke-opacity="0.7">
+    <line x1="128" y1="208" x2="222" y2="196"/>
+    <line x1="128" y1="242" x2="222" y2="230"/>
+    <line x1="128" y1="276" x2="222" y2="264"/>
+    <line x1="128" y1="310" x2="190" y2="302"/>
+  </g>
+  <!-- text lines, right page -->
+  <g stroke="#a89e87" stroke-width="9" stroke-linecap="round" stroke-opacity="0.7">
+    <line x1="290" y1="196" x2="384" y2="208"/>
+    <line x1="290" y1="230" x2="384" y2="242"/>
+    <line x1="290" y1="264" x2="384" y2="276"/>
+  </g>
+
+  <!-- brass bookmark ribbon over the right page -->
+  <path fill="url(#ribbon)" d="M316,150 L354,158 L354,306 L335,284 L316,298 Z"/>
+</svg>
