@@ -5,7 +5,7 @@
 #
 pkgname=book-studio
 pkgver=1.1.0
-pkgrel=2
+pkgrel=3
 pkgdesc="Desktop studio to write, design and export books and magazines as PDF and ePub"
 arch=('x86_64')
 url="https://github.com/giovapanasiti/book_studio"
