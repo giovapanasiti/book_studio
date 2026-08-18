@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { Book, Styles } from '../types';
-import { PAGE_SIZES, MM_TO_PX, fontStack } from '../types';
+import { PAGE_SIZES, MM_TO_PX, fontStack, BOOK_LANGUAGES, locChapter, locTOC } from '../types';
 
 interface Props {
   book: Book;
@@ -113,12 +113,17 @@ export function DesignView({ book, onBook, onStyles }: Props) {
           </div>
           <div className="field-row">
             <label>Language</label>
-            <input
-              className="text-input num-input"
-              value={book.language}
-              maxLength={5}
+            <select
+              className="select-input grow"
+              value={BOOK_LANGUAGES.some(([c]) => c === book.language) ? book.language : 'en'}
               onChange={(e) => onBook({ language: e.target.value })}
-            />
+            >
+              {BOOK_LANGUAGES.map(([code, name]) => (
+                <option key={code} value={code}>
+                  {name}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="field-row">
             <label>Description</label>
@@ -198,6 +203,26 @@ export function DesignView({ book, onBook, onStyles }: Props) {
           {check('Chapter numbering', 'chapterNumbering')}
           {check('Page numbers', 'showPageNumbers')}
           {check('Running header', 'showHeader')}
+          <div className="field-row">
+            <label>Chapter label</label>
+            <input
+              className="text-input grow"
+              value={s.chapterLabel ?? ''}
+              placeholder={locChapter(book.language)}
+              title="The word before the chapter number. Empty = follow the language."
+              onChange={(e) => onStyles({ chapterLabel: e.target.value })}
+            />
+          </div>
+          <div className="field-row">
+            <label>Contents title</label>
+            <input
+              className="text-input grow"
+              value={s.tocTitle ?? ''}
+              placeholder={locTOC(book.language)}
+              title="The heading of the table of contents. Empty = follow the language."
+              onChange={(e) => onStyles({ tocTitle: e.target.value })}
+            />
+          </div>
         </div>
 
         <div className="panel-section">
@@ -225,7 +250,7 @@ export function DesignView({ book, onBook, onStyles }: Props) {
             }}
           >
             <div className="chapter-open" style={{ margin: '6% 0 1.6em' }}>
-              {s.chapterNumbering && <p className="num">Chapter One</p>}
+              {s.chapterNumbering && <p className="num">{(s.chapterLabel?.trim() || locChapter(book.language)) + ' 1'}</p>}
               <h1>The Specimen Page</h1>
               <div className="rule" />
             </div>

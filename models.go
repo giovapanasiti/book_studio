@@ -1,11 +1,20 @@
 package main
 
-// Chapter is one markdown chapter of the book.
+import "strings"
+
+// Chapter is one entry of the book: a markdown chapter, or a full-page
+// image plate (Kind "image").
 type Chapter struct {
 	ID    string `json:"id"`
 	Title string `json:"title"`
 	File  string `json:"file"`
+	Kind  string `json:"kind,omitempty"`  // "" | "text" | "image"
+	Image string `json:"image,omitempty"` // image name for Kind "image"
+	Fit   string `json:"fit,omitempty"`   // cover | contain (image pages)
 }
+
+// IsImagePage reports whether the chapter is a full-page image plate.
+func (c Chapter) IsImagePage() bool { return c.Kind == "image" }
 
 // Styles holds the design settings that control pagination and typography.
 type Styles struct {
@@ -33,6 +42,8 @@ type Styles struct {
 	TocEnabled       bool    `json:"tocEnabled"`
 	TitlePageEnabled bool    `json:"titlePageEnabled"`
 	ChapterNumbering bool    `json:"chapterNumbering"`
+	ChapterLabel     string  `json:"chapterLabel"` // "" = by language ("Capitolo", …)
+	TocTitle         string  `json:"tocTitle"`     // "" = by language ("Indice", …)
 }
 
 // CoverText is one text element on the cover.
@@ -110,16 +121,25 @@ type Book struct {
 	Cover       Cover     `json:"cover"`
 }
 
+func langCode(lang string) string {
+	if len(lang) >= 2 {
+		return strings.ToLower(lang[:2])
+	}
+	return "en"
+}
+
 // LocTOC returns the table-of-contents title for the book language.
 func LocTOC(lang string) string {
-	switch {
-	case len(lang) >= 2 && lang[:2] == "it":
+	switch langCode(lang) {
+	case "it":
 		return "Indice"
-	case len(lang) >= 2 && lang[:2] == "fr":
+	case "fr":
 		return "Table des matières"
-	case len(lang) >= 2 && lang[:2] == "es":
+	case "es":
 		return "Índice"
-	case len(lang) >= 2 && lang[:2] == "de":
+	case "pt":
+		return "Índice"
+	case "de":
 		return "Inhalt"
 	default:
 		return "Contents"
@@ -128,18 +148,36 @@ func LocTOC(lang string) string {
 
 // LocChapter returns the chapter label for the book language.
 func LocChapter(lang string) string {
-	switch {
-	case len(lang) >= 2 && lang[:2] == "it":
+	switch langCode(lang) {
+	case "it":
 		return "Capitolo"
-	case len(lang) >= 2 && lang[:2] == "fr":
+	case "fr":
 		return "Chapitre"
-	case len(lang) >= 2 && lang[:2] == "es":
+	case "es":
 		return "Capítulo"
-	case len(lang) >= 2 && lang[:2] == "de":
+	case "pt":
+		return "Capítulo"
+	case "de":
 		return "Kapitel"
 	default:
 		return "Chapter"
 	}
+}
+
+// ChapterLabelFor returns the configured chapter label, or the language default.
+func ChapterLabelFor(b *Book) string {
+	if s := strings.TrimSpace(b.Styles.ChapterLabel); s != "" {
+		return s
+	}
+	return LocChapter(b.Language)
+}
+
+// TocTitleFor returns the configured contents title, or the language default.
+func TocTitleFor(b *Book) string {
+	if s := strings.TrimSpace(b.Styles.TocTitle); s != "" {
+		return s
+	}
+	return LocTOC(b.Language)
 }
 
 // PageSizeMM returns width and height in millimeters for a page size name.

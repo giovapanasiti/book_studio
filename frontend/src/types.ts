@@ -2,6 +2,13 @@ export interface Chapter {
   id: string;
   title: string;
   file: string;
+  kind?: 'text' | 'image';
+  image?: string;
+  fit?: 'cover' | 'contain';
+}
+
+export function isImagePage(c: Chapter): boolean {
+  return c.kind === 'image';
 }
 
 export interface Styles {
@@ -29,6 +36,8 @@ export interface Styles {
   tocEnabled: boolean;
   titlePageEnabled: boolean;
   chapterNumbering: boolean;
+  chapterLabel: string;
+  tocTitle: string;
 }
 
 export interface CoverText {
@@ -333,14 +342,34 @@ export const PAGE_SIZES: Record<string, { w: number; h: number; label: string }>
 export const MM_TO_PX = 96 / 25.4;
 
 // Localized labels for generated book matter; keep in sync with the Go side.
+export const BOOK_LANGUAGES: [string, string][] = [
+  ['en', 'English'],
+  ['it', 'Italiano'],
+  ['fr', 'Français'],
+  ['es', 'Español'],
+  ['pt', 'Português'],
+  ['de', 'Deutsch'],
+];
+
 export function locTOC(lang: string): string {
-  const l = (lang || '').slice(0, 2);
-  return { it: 'Indice', fr: 'Table des matières', es: 'Índice', de: 'Inhalt' }[l] ?? 'Contents';
+  const l = (lang || '').slice(0, 2).toLowerCase();
+  return (
+    { it: 'Indice', fr: 'Table des matières', es: 'Índice', pt: 'Índice', de: 'Inhalt' }[l] ?? 'Contents'
+  );
 }
 
 export function locChapter(lang: string): string {
-  const l = (lang || '').slice(0, 2);
-  return { it: 'Capitolo', fr: 'Chapitre', es: 'Capítulo', de: 'Kapitel' }[l] ?? 'Chapter';
+  const l = (lang || '').slice(0, 2).toLowerCase();
+  return { it: 'Capitolo', fr: 'Chapitre', es: 'Capítulo', pt: 'Capítulo', de: 'Kapitel' }[l] ?? 'Chapter';
+}
+
+// Effective labels: the user's custom text wins over the language default.
+export function chapterLabelFor(book: Book): string {
+  return book.styles.chapterLabel?.trim() || locChapter(book.language);
+}
+
+export function tocTitleFor(book: Book): string {
+  return book.styles.tocTitle?.trim() || locTOC(book.language);
 }
 
 export function fontStack(name: string): string {

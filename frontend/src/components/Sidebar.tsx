@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import type { Book, Chapter } from '../types';
+import { isImagePage } from '../types';
 import { imageURLStable } from '../api';
 import { useCtxMenu } from './ContextMenu';
 
@@ -9,6 +10,7 @@ interface Props {
   images: string[];
   onSelectChapter: (id: string) => void;
   onAddChapter: () => void;
+  onAddImagePage: (beforeId?: string) => void;
   onRenameChapter: (id: string, title: string) => void;
   onDeleteChapter: (id: string) => void;
   onDuplicateChapter: (id: string) => void;
@@ -52,6 +54,7 @@ export function Sidebar(p: Props) {
       },
     },
     { label: 'Duplicate', onClick: () => p.onDuplicateChapter(ch.id) },
+    { label: 'Insert image page before', onClick: () => p.onAddImagePage(ch.id) },
     { sep: true },
     { label: 'Move up', disabled: idx === 0, onClick: () => moveChapter(idx, idx - 1) },
     {
@@ -137,18 +140,28 @@ export function Sidebar(p: Props) {
                     />
                   ) : (
                     <>
-                      <span className="t">{ch.title}</span>
+                      <span className="t">{isImagePage(ch) ? '▣ ' + ch.title : ch.title}</span>
                       <span className="leader" />
-                      <span className="n">{i + 1}</span>
+                      <span className="n">{isImagePage(ch) ? '▣' : i + 1}</span>
                     </>
                   )}
                 </button>
               ))}
             </div>
           </div>
-          <button className="sidebar-add" onClick={p.onAddChapter}>
-            + New chapter
-          </button>
+          <div style={{ display: 'flex', gap: 6, margin: 8 }}>
+            <button className="sidebar-add" style={{ margin: 0, flex: 1.4 }} onClick={p.onAddChapter}>
+              + New chapter
+            </button>
+            <button
+              className="sidebar-add"
+              style={{ margin: 0, flex: 1 }}
+              title="A full-page image, printed before the next chapter"
+              onClick={() => p.onAddImagePage()}
+            >
+              + Image page
+            </button>
+          </div>
         </>
       )}
 

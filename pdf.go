@@ -166,6 +166,7 @@ type engine struct {
 	bodyStartPage  int
 	folios         map[int]int // chapter index -> folio
 	collect        map[int]int
+	noFolio        map[int]bool // physical pages without folio/header (image plates)
 }
 
 func newEngine(projectDir string, b *Book) *engine {
@@ -176,6 +177,7 @@ func newEngine(projectDir string, b *Book) *engine {
 		pdf: pdf, b: b, s: &b.Styles, projectDir: projectDir,
 		pageW: w, pageH: h,
 		collect: map[int]int{},
+		noFolio: map[int]bool{},
 	}
 	e.tr = pdf.UnicodeTranslatorFromDescriptor("")
 	e.topY = b.Styles.MarginTop
@@ -183,7 +185,7 @@ func newEngine(projectDir string, b *Book) *engine {
 
 	pdf.SetHeaderFunc(func() {
 		e.applyMargins()
-		if e.inBody && e.s.ShowHeader && !e.suppressHeader {
+		if e.inBody && e.s.ShowHeader && !e.suppressHeader && !e.noFolio[pdf.PageNo()] {
 			pdf.SetFont(coreFont(e.s.HeadingFont), "I", 8)
 			r, g, bl := hexRGB(e.s.TextColor)
 			pdf.SetTextColor(r, g, bl)
@@ -197,7 +199,7 @@ func newEngine(projectDir string, b *Book) *engine {
 		e.suppressHeader = false
 	})
 	pdf.SetFooterFunc(func() {
-		if e.inBody && e.s.ShowPageNumbers {
+		if e.inBody && e.s.ShowPageNumbers && !e.noFolio[pdf.PageNo()] {
 			folio := pdf.PageNo() - e.bodyStartPage + 1
 			if folio >= 1 {
 				pdf.SetFont(coreFont(e.s.BodyFont), "", 9)
@@ -860,12 +862,15 @@ func (e *engine) renderTOC() {
 	o.color = e.s.HeadingColor
 	o.spaceAfter = 8
 	e.y += 10
-	e.writePara(wordsFromRuns([]seg{{text: LocTOC(e.b.Language)}}), o)
+	e.writePara(wordsFromRuns([]seg{{text: TocTitleFor(e.b)}}), o)
 
 	body := e.bodyOpts()
 	lh := body.lineH * 1.25
 	r, g, b := hexRGB(e.s.TextColor)
 	for i, ch := range e.b.Chapters {
+		if ch.IsImagePage() {
+			continue // image plates stay out of the contents
+		}
 		e.ensure(lh)
 		e.pdf.SetFont(body.family, "", body.size)
 		e.pdf.SetTextColor(r, g, b)
@@ -900,7 +905,50 @@ func (e *engine) renderTOC() {
 	}
 }
 
-func (e *engine) renderChapter(i int, ch Chapter, src []byte) {
+// renderImagePage draws a full-bleed image plate with no header or folio.
+func (e *engine) renderImagePage(i int, ch Chapter) {
+	e.suppressHeader = true
+	e.addPage()
+	e.noFolio[e.pdf.PageNo()] = true
+	e.collect[i] = e.pdf.PageNo() - e.bodyStartPage + 1
+	if ch.Image == "" {
+		return
+	}
+	path := filepath.Join(e.projectDir, "images", filepath.Base(ch.Image))
+	ext := strings.ToLower(filepath.Ext(path))
+	if ext != ".png" && ext != ".jpg" && ext != ".jpeg" && ext != ".gif" {
+		return
+	}
+	if _, err := os.Stat(path); err != nil {
+		return
+	}
+	info := e.pdf.RegisterImageOptions(path, fpdf.ImageOptions{})
+	if info == nil || e.pdf.Err() {
+		e.pdf.ClearError()
+		return
+	}
+	iw, ih := info.Extent()
+	if ch.Fit == "contain" {
+		scale := e.pageW / iw
+		if ih*scale > e.pageH {
+			scale = e.pageH / ih
+		}
+		w, h := iw*scale, ih*scale
+		e.pdf.ImageOptions(path, (e.pageW-w)/2, (e.pageH-h)/2, w, h, false, fpdf.ImageOptions{}, 0, "")
+		return
+	}
+	// Full-bleed: scale to cover the page and clip the overflow.
+	scale := e.pageW / iw
+	if ih*scale < e.pageH {
+		scale = e.pageH / ih
+	}
+	w, h := iw*scale, ih*scale
+	e.pdf.ClipRect(0, 0, e.pageW, e.pageH, false)
+	e.pdf.ImageOptions(path, (e.pageW-w)/2, (e.pageH-h)/2, w, h, false, fpdf.ImageOptions{}, 0, "")
+	e.pdf.ClipEnd()
+}
+
+func (e *engine) renderChapter(i, number int, ch Chapter, src []byte) {
 	e.suppressHeader = true
 	e.headerText = ch.Title
 	e.addPage()
@@ -916,7 +964,7 @@ func (e *engine) renderChapter(i int, ch Chapter, src []byte) {
 		o.lineH = o.size * ptToMm * 1.4
 		o.color = e.s.AccentColor
 		o.spaceAfter = 3
-		e.writePara(wordsFromRuns([]seg{{text: strings.ToUpper(fmt.Sprintf("%s %d", LocChapter(e.b.Language), i+1))}}), o)
+		e.writePara(wordsFromRuns([]seg{{text: strings.ToUpper(fmt.Sprintf("%s %d", ChapterLabelFor(e.b), number))}}), o)
 	}
 	to := e.bodyOpts()
 	to.justify = false
@@ -963,9 +1011,15 @@ func (e *engine) render() error {
 	}
 	e.inBody = true
 	e.bodyStartPage = e.pdf.PageNo() + 1
+	number := 0
 	for i, ch := range e.b.Chapters {
+		if ch.IsImagePage() {
+			e.renderImagePage(i, ch)
+			continue
+		}
+		number++
 		src, _ := os.ReadFile(filepath.Join(e.projectDir, "chapters", filepath.Base(ch.File)))
-		e.renderChapter(i, ch, src)
+		e.renderChapter(i, number, ch, src)
 	}
 	e.inBody = false
 	return e.pdf.Error()

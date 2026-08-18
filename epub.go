@@ -111,6 +111,8 @@ hr:after { content: "* * *"; letter-spacing: 0.6em; }
 .covertext { text-align: center; padding-top: 20%%; }
 .cover-image { text-align: center; margin: 0; }
 .cover-image img { max-width: 100%%; max-height: 100%%; }
+.plate { text-align: center; margin: 0; page-break-before: always; page-break-after: always; }
+.plate img { max-width: 100%%; max-height: 100%%; }
 a { color: %s; }
 `, s.AccentColor))
 	return sb.String()
@@ -220,27 +222,37 @@ func WriteEPUB(projectDir string, b *Book, target string) error {
 		spine = append(spine, "titlepage")
 	}
 
-	// Chapters.
+	// Chapters and image plates.
 	navEntries := []string{}
+	number := 0
 	for i, ch := range b.Chapters {
-		raw, _ := os.ReadFile(filepath.Join(projectDir, "chapters", filepath.Base(ch.File)))
-		var buf bytes.Buffer
-		if err := md.Convert(raw, &buf); err != nil {
-			return err
-		}
-		body := ""
-		if b.Styles.ChapterNumbering {
-			body += fmt.Sprintf(`<p class="chapter-number">%s %d</p>`+"\n", LocChapter(lang), i+1)
-		}
-		body += `<div class="chapter">` + "\n" + buf.String() + "\n</div>"
 		name := fmt.Sprintf("chap-%03d.xhtml", i+1)
+		id := fmt.Sprintf("chap%03d", i+1)
+		var body string
+		if ch.IsImagePage() {
+			if ch.Image == "" {
+				continue
+			}
+			body = fmt.Sprintf(`<div class="plate"><img src="images/%s" alt="%s"/></div>`,
+				html.EscapeString(filepath.Base(ch.Image)), html.EscapeString(ch.Title))
+		} else {
+			number++
+			raw, _ := os.ReadFile(filepath.Join(projectDir, "chapters", filepath.Base(ch.File)))
+			var buf bytes.Buffer
+			if err := md.Convert(raw, &buf); err != nil {
+				return err
+			}
+			if b.Styles.ChapterNumbering {
+				body += fmt.Sprintf(`<p class="chapter-number">%s %d</p>`+"\n", ChapterLabelFor(b), number)
+			}
+			body += `<div class="chapter">` + "\n" + buf.String() + "\n</div>"
+			navEntries = append(navEntries, fmt.Sprintf(`<li><a href="%s">%s</a></li>`, name, html.EscapeString(ch.Title)))
+		}
 		if err := add("OEBPS/"+name, xhtmlDoc(ch.Title, lang, body)); err != nil {
 			return err
 		}
-		id := fmt.Sprintf("chap%03d", i+1)
 		items = append(items, item{id, name, "application/xhtml+xml", ""})
 		spine = append(spine, id)
-		navEntries = append(navEntries, fmt.Sprintf(`<li><a href="%s">%s</a></li>`, name, html.EscapeString(ch.Title)))
 	}
 
 	// Images.
@@ -289,8 +301,8 @@ func WriteEPUB(projectDir string, b *Book, target string) error {
 	}
 
 	// Navigation document.
-	nav := fmt.Sprintf(`<nav epub:type="toc" id="toc"><h1>%s</h1><ol>%s</ol></nav>`, LocTOC(lang), strings.Join(navEntries, "\n"))
-	if err := add("OEBPS/nav.xhtml", xhtmlDoc(LocTOC(lang), lang, nav)); err != nil {
+	nav := fmt.Sprintf(`<nav epub:type="toc" id="toc"><h1>%s</h1><ol>%s</ol></nav>`, html.EscapeString(TocTitleFor(b)), strings.Join(navEntries, "\n"))
+	if err := add("OEBPS/nav.xhtml", xhtmlDoc(TocTitleFor(b), lang, nav)); err != nil {
 		return err
 	}
 
@@ -302,9 +314,14 @@ func WriteEPUB(projectDir string, b *Book, target string) error {
 <head><meta name="dtb:uid" content="urn:uuid:%s"/></head>
 <docTitle><text>%s</text></docTitle>
 <navMap>`, bookID, html.EscapeString(b.Title))
+	order := 0
 	for i, ch := range b.Chapters {
+		if ch.IsImagePage() {
+			continue
+		}
+		order++
 		fmt.Fprintf(&ncx, `<navPoint id="np-%d" playOrder="%d"><navLabel><text>%s</text></navLabel><content src="chap-%03d.xhtml"/></navPoint>`,
-			i+1, i+1, html.EscapeString(ch.Title), i+1)
+			order, order, html.EscapeString(ch.Title), i+1)
 	}
 	ncx.WriteString(`</navMap></ncx>`)
 	if err := add("OEBPS/toc.ncx", ncx.String()); err != nil {

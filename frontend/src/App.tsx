@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { EventsOn } from '../wailsjs/runtime/runtime';
 import type { Bible, Book, Chapter, Cover, Styles, ViewName } from './types';
-import { defaultBible } from './types';
+import { defaultBible, isImagePage } from './types';
+import { ImagePageView } from './components/ImagePageView';
 import { api } from './api';
 import { ContextMenuProvider } from './components/ContextMenu';
 import { ToastProvider, useToast } from './components/Toast';
@@ -157,6 +158,38 @@ function Studio() {
     }
   };
 
+  const addImagePage = async (beforeId?: string) => {
+    try {
+      const ch = await api.createChapter('Image page');
+      const b = await api.getBook();
+      let chapters = b.chapters.map((c) =>
+        c.id === ch.id ? { ...c, kind: 'image' as const, fit: 'cover' as const } : c
+      );
+      if (beforeId) {
+        const page = chapters.find((c) => c.id === ch.id);
+        if (page) {
+          chapters = chapters.filter((c) => c.id !== ch.id);
+          const idx = chapters.findIndex((c) => c.id === beforeId);
+          chapters.splice(idx < 0 ? chapters.length : idx, 0, page);
+        }
+      }
+      const nb = { ...b, chapters };
+      setBook(nb);
+      scheduleSave();
+      await selectChapter(ch.id, nb);
+      setView('write');
+    } catch (e) {
+      toast('error', String(e));
+    }
+  };
+
+  const patchChapter = (id: string, patch: Partial<Chapter>) => {
+    setBook((b) =>
+      b ? { ...b, chapters: b.chapters.map((c) => (c.id === id ? { ...c, ...patch } : c)) } : b
+    );
+    scheduleSave();
+  };
+
   const renameChapter = (id: string, title: string) => {
     setBook((b) =>
       b ? { ...b, chapters: b.chapters.map((c) => (c.id === id ? { ...c, title } : c)) } : b
@@ -200,14 +233,20 @@ function Studio() {
 
   const refreshImages = async () => setImages(await api.listImages().catch(() => []));
 
-  const importImages = async () => {
+  const importImagesReturning = async (): Promise<string[]> => {
     try {
       const added = await api.importImages();
       if (added.length) toast('success', `Imported ${added.length} image${added.length > 1 ? 's' : ''}`);
       await refreshImages();
+      return added;
     } catch (e) {
       toast('error', String(e));
+      return [];
     }
+  };
+
+  const importImages = async () => {
+    await importImagesReturning();
   };
 
   const insertImage = (name: string) => {
@@ -366,6 +405,7 @@ function Studio() {
             void selectChapter(id);
           }}
           onAddChapter={() => void addChapter()}
+          onAddImagePage={(beforeId) => void addImagePage(beforeId)}
           onRenameChapter={renameChapter}
           onDeleteChapter={(id) => void deleteChapter(id)}
           onDuplicateChapter={(id) => void duplicateChapter(id)}
@@ -386,7 +426,14 @@ function Studio() {
 
         <main className="main-pane">
           {view === 'write' &&
-            (activeChapter ? (
+            (activeChapter && isImagePage(activeChapter) ? (
+              <ImagePageView
+                chapter={activeChapter}
+                images={images}
+                onPatch={(patch) => patchChapter(activeChapter.id, patch)}
+                onImportImages={importImagesReturning}
+              />
+            ) : activeChapter ? (
               <Editor ref={editorRef} value={chapterText} onChange={onEditText} />
             ) : (
               <div className="empty-hint" style={{ marginTop: 80 }}>
