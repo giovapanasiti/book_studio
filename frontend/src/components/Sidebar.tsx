@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { Book, Chapter } from '../types';
-import { isImagePage } from '../types';
+import { isImagePage, chapterNumbers } from '../types';
 import { imageURLStable } from '../api';
 import { useCtxMenu } from './ContextMenu';
 
@@ -11,6 +11,7 @@ interface Props {
   onSelectChapter: (id: string) => void;
   onAddChapter: () => void;
   onAddImagePage: (beforeId?: string) => void;
+  onSetUnnumbered: (id: string, unnumbered: boolean) => void;
   onRenameChapter: (id: string, title: string) => void;
   onDeleteChapter: (id: string) => void;
   onDuplicateChapter: (id: string) => void;
@@ -55,6 +56,15 @@ export function Sidebar(p: Props) {
     },
     { label: 'Duplicate', onClick: () => p.onDuplicateChapter(ch.id) },
     { label: 'Insert image page before', onClick: () => p.onAddImagePage(ch.id) },
+    ...(!isImagePage(ch)
+      ? [
+          {
+            label: ch.unnumbered ? 'Count in chapter numbers' : 'Exclude from chapter numbers',
+            hint: ch.unnumbered ? '' : 'front/back matter',
+            onClick: () => p.onSetUnnumbered(ch.id, !ch.unnumbered),
+          },
+        ]
+      : []),
     { sep: true },
     { label: 'Move up', disabled: idx === 0, onClick: () => moveChapter(idx, idx - 1) },
     {
@@ -80,6 +90,8 @@ export function Sidebar(p: Props) {
     { label: 'Rename…', onClick: () => p.onRenameImage(name) },
     { label: 'Delete image', danger: true, onClick: () => p.onDeleteImage(name) },
   ];
+
+  const numbers = chapterNumbers(p.book.chapters);
 
   return (
     <aside className="sidebar">
@@ -142,7 +154,7 @@ export function Sidebar(p: Props) {
                     <>
                       <span className="t">{isImagePage(ch) ? '▣ ' + ch.title : ch.title}</span>
                       <span className="leader" />
-                      <span className="n">{isImagePage(ch) ? '▣' : i + 1}</span>
+                      <span className="n">{isImagePage(ch) ? '▣' : numbers.get(ch.id) ?? '·'}</span>
                     </>
                   )}
                 </button>

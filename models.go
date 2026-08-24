@@ -11,6 +11,10 @@ type Chapter struct {
 	Kind  string `json:"kind,omitempty"`  // "" | "text" | "image"
 	Image string `json:"image,omitempty"` // image name for Kind "image"
 	Fit   string `json:"fit,omitempty"`   // cover | contain (image pages)
+	// Unnumbered marks front/back matter (prologue, dedication, epilogue…):
+	// the chapter keeps its page and TOC entry but takes no chapter number,
+	// so the first numbered chapter is truly "Chapter 1".
+	Unnumbered bool `json:"unnumbered,omitempty"`
 }
 
 // IsImagePage reports whether the chapter is a full-page image plate.
@@ -161,6 +165,24 @@ func LocChapter(lang string) string {
 		return "Kapitel"
 	default:
 		return "Chapter"
+	}
+}
+
+// LocCover returns the cover label for the book language.
+func LocCover(lang string) string {
+	switch langCode(lang) {
+	case "it":
+		return "Copertina"
+	case "fr":
+		return "Couverture"
+	case "es":
+		return "Cubierta"
+	case "pt":
+		return "Capa"
+	case "de":
+		return "Umschlag"
+	default:
+		return "Cover"
 	}
 }
 

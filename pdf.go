@@ -956,7 +956,7 @@ func (e *engine) renderChapter(i, number int, ch Chapter, src []byte) {
 
 	// Chapter opening.
 	e.y = e.topY + (e.botY-e.topY)*0.12
-	if e.s.ChapterNumbering {
+	if e.s.ChapterNumbering && number > 0 {
 		o := e.bodyOpts()
 		o.justify = false
 		o.align = "C"
@@ -1017,9 +1017,13 @@ func (e *engine) render() error {
 			e.renderImagePage(i, ch)
 			continue
 		}
-		number++
+		n := 0
+		if !ch.Unnumbered {
+			number++
+			n = number
+		}
 		src, _ := os.ReadFile(filepath.Join(e.projectDir, "chapters", filepath.Base(ch.File)))
-		e.renderChapter(i, number, ch, src)
+		e.renderChapter(i, n, ch, src)
 	}
 	e.inBody = false
 	return e.pdf.Error()

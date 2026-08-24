@@ -5,10 +5,25 @@ export interface Chapter {
   kind?: 'text' | 'image';
   image?: string;
   fit?: 'cover' | 'contain';
+  unnumbered?: boolean;
 }
 
 export function isImagePage(c: Chapter): boolean {
   return c.kind === 'image';
+}
+
+// chapterNumbers assigns the printed chapter number to each numbered text
+// chapter; image pages and unnumbered chapters (prologue, epilogue…) get none.
+export function chapterNumbers(chapters: Chapter[]): Map<string, number> {
+  const out = new Map<string, number>();
+  let n = 0;
+  for (const c of chapters) {
+    if (!isImagePage(c) && !c.unnumbered) {
+      n++;
+      out.set(c.id, n);
+    }
+  }
+  return out;
 }
 
 export interface Styles {

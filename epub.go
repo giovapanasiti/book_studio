@@ -185,10 +185,10 @@ func WriteEPUB(projectDir string, b *Book, target string) error {
 	}
 	var coverBody string
 	if coverRender {
-		coverBody = `<div class="cover-image"><img src="images/cover-render.png" alt="Cover"/></div>`
+		coverBody = fmt.Sprintf(`<div class="cover-image"><img src="images/cover-render.png" alt="%s"/></div>`, html.EscapeString(LocCover(lang)))
 		coverImage = ""
 	} else if coverImage != "" {
-		coverBody = fmt.Sprintf(`<div class="cover-image"><img src="images/%s" alt="Cover"/></div>`, html.EscapeString(coverImage))
+		coverBody = fmt.Sprintf(`<div class="cover-image"><img src="images/%s" alt="%s"/></div>`, html.EscapeString(coverImage), html.EscapeString(LocCover(lang)))
 	} else {
 		grad := b.Cover.BgColor
 		coverBody = fmt.Sprintf(
@@ -202,7 +202,7 @@ func WriteEPUB(projectDir string, b *Book, target string) error {
 			html.EscapeString(b.Cover.Subtitle.Color), html.EscapeString(b.Cover.Subtitle.Text),
 			html.EscapeString(b.Cover.Author.Color), html.EscapeString(b.Cover.Author.Text))
 	}
-	if err := add("OEBPS/cover.xhtml", xhtmlDoc("Cover", lang, coverBody)); err != nil {
+	if err := add("OEBPS/cover.xhtml", xhtmlDoc(LocCover(lang), lang, coverBody)); err != nil {
 		return err
 	}
 	items = append(items, item{"cover", "cover.xhtml", "application/xhtml+xml", ""})
@@ -236,14 +236,16 @@ func WriteEPUB(projectDir string, b *Book, target string) error {
 			body = fmt.Sprintf(`<div class="plate"><img src="images/%s" alt="%s"/></div>`,
 				html.EscapeString(filepath.Base(ch.Image)), html.EscapeString(ch.Title))
 		} else {
-			number++
 			raw, _ := os.ReadFile(filepath.Join(projectDir, "chapters", filepath.Base(ch.File)))
 			var buf bytes.Buffer
 			if err := md.Convert(raw, &buf); err != nil {
 				return err
 			}
-			if b.Styles.ChapterNumbering {
-				body += fmt.Sprintf(`<p class="chapter-number">%s %d</p>`+"\n", ChapterLabelFor(b), number)
+			if !ch.Unnumbered {
+				number++
+				if b.Styles.ChapterNumbering {
+					body += fmt.Sprintf(`<p class="chapter-number">%s %d</p>`+"\n", ChapterLabelFor(b), number)
+				}
 			}
 			body += `<div class="chapter">` + "\n" + buf.String() + "\n</div>"
 			navEntries = append(navEntries, fmt.Sprintf(`<li><a href="%s">%s</a></li>`, name, html.EscapeString(ch.Title)))

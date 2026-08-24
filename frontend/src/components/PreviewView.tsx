@@ -73,14 +73,16 @@ export function PreviewView({ book }: { book: Book }) {
           out.push({ kind: 'plate', image: ch.image, fit: ch.fit ?? 'cover', folio: folio++ });
           continue;
         }
-        number++;
+        if (!ch.unnumbered) number++;
         const md = await api.readChapter(ch.file).catch(() => '');
         let html = renderMarkdown(md);
         // Remove a leading H1 that repeats the chapter title.
         html = html.replace(/^\s*<h1[^>]*>[\s\S]*?<\/h1>/, '');
         const open =
           `<div class="chapter-open">` +
-          (s.chapterNumbering ? `<p class="num">${chapterLabelFor(book)} ${number}</p>` : '') +
+          (s.chapterNumbering && !ch.unnumbered
+            ? `<p class="num">${chapterLabelFor(book)} ${number}</p>`
+            : '') +
           `<h1>${escapeHTML(ch.title)}</h1><div class="rule"></div></div>`;
         const chunks = await paginate(open + html, {
           colWidthPx: colW,

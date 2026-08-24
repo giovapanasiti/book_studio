@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { EventsOn } from '../wailsjs/runtime/runtime';
 import type { Bible, Book, Chapter, Cover, Styles, ViewName } from './types';
-import { defaultBible, isImagePage } from './types';
+import { defaultBible, isImagePage, chapterNumbers, chapterLabelFor } from './types';
 import { ImagePageView } from './components/ImagePageView';
 import { api } from './api';
 import { ContextMenuProvider } from './components/ContextMenu';
@@ -146,9 +146,11 @@ function Studio() {
   };
 
   const addChapter = async () => {
-    const n = (bookRef.current?.chapters.length ?? 0) + 1;
+    const b0 = bookRef.current;
+    const n = (b0 ? chapterNumbers(b0.chapters).size : 0) + 1;
+    const label = b0 ? chapterLabelFor(b0) : 'Chapter';
     try {
-      const ch = await api.createChapter(`Chapter ${n}`);
+      const ch = await api.createChapter(`${label} ${n}`);
       const b = await api.getBook();
       setBook(b);
       await selectChapter(ch.id, b);
@@ -406,6 +408,7 @@ function Studio() {
           }}
           onAddChapter={() => void addChapter()}
           onAddImagePage={(beforeId) => void addImagePage(beforeId)}
+          onSetUnnumbered={(id, unnumbered) => patchChapter(id, { unnumbered })}
           onRenameChapter={renameChapter}
           onDeleteChapter={(id) => void deleteChapter(id)}
           onDuplicateChapter={(id) => void duplicateChapter(id)}
