@@ -3,6 +3,7 @@ import { EventsOn } from '../wailsjs/runtime/runtime';
 import type { Bible, Book, Chapter, Cover, Styles, ViewName } from './types';
 import { defaultBible, isImagePage, chapterNumbers, chapterLabelFor } from './types';
 import { ImagePageView } from './components/ImagePageView';
+import { FocusMode } from './components/FocusMode';
 import { api } from './api';
 import { ContextMenuProvider } from './components/ContextMenu';
 import { ToastProvider, useToast } from './components/Toast';
@@ -29,6 +30,7 @@ function Studio() {
   const [renamingImage, setRenamingImage] = useState<string | null>(null);
   const [renameVal, setRenameVal] = useState('');
   const [showAbout, setShowAbout] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
   const toast = useToast();
 
   const [bible, setBible] = useState<Bible | null>(null);
@@ -305,6 +307,25 @@ function Studio() {
     }
   };
 
+  // ---------- focus mode ----------
+
+  const canFocus = view === 'write' && !!activeChapter && !isImagePage(activeChapter);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'F' || e.key === 'f')) {
+        e.preventDefault();
+        setFocusMode((f) => !f);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  useEffect(() => {
+    if (!canFocus) setFocusMode(false);
+  }, [canFocus]);
+
   // ---------- native menu ----------
 
   useEffect(() => {
@@ -335,6 +356,10 @@ function Studio() {
           break;
         case 'view-write':
           setView('write');
+          break;
+        case 'view-focus':
+          setView('write');
+          setFocusMode((f) => !f);
           break;
         case 'view-bible':
           setView('bible');
@@ -437,7 +462,7 @@ function Studio() {
                 onImportImages={importImagesReturning}
               />
             ) : activeChapter ? (
-              <Editor ref={editorRef} value={chapterText} onChange={onEditText} />
+              <Editor ref={editorRef} value={chapterText} onChange={onEditText} onFocusMode={() => setFocusMode(true)} />
             ) : (
               <div className="empty-hint" style={{ marginTop: 80 }}>
                 Create a chapter to start writing.
@@ -462,6 +487,15 @@ function Studio() {
           {view === 'preview' && <PreviewView book={book} />}
         </main>
       </div>
+
+      {focusMode && canFocus && activeChapter && (
+        <FocusMode
+          title={activeChapter.title}
+          value={chapterText}
+          onChange={onEditText}
+          onExit={() => setFocusMode(false)}
+        />
+      )}
 
       {editingImage && (
         <ImageEditor

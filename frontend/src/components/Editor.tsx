@@ -10,9 +10,10 @@ export interface EditorHandle {
 interface Props {
   value: string;
   onChange: (v: string) => void;
+  onFocusMode?: () => void;
 }
 
-export const Editor = forwardRef<EditorHandle, Props>(function Editor({ value, onChange }, ref) {
+export const Editor = forwardRef<EditorHandle, Props>(function Editor({ value, onChange, onFocusMode }, ref) {
   const ta = useRef<HTMLTextAreaElement>(null);
   const [showPreview, setShowPreview] = useState(true);
   const ctx = useCtxMenu();
@@ -134,6 +135,11 @@ export const Editor = forwardRef<EditorHandle, Props>(function Editor({ value, o
         <div className="tool-spacer" />
         <span className="word-count">{words.toLocaleString()} words</span>
         <div className="tool-sep" />
+        {onFocusMode && (
+          <button className="tool-btn" title="Focus mode (Ctrl+Shift+F): just you and the text" onClick={onFocusMode}>
+            ⛶
+          </button>
+        )}
         <button
           className={'tool-btn' + (showPreview ? '' : '')}
           style={showPreview ? { color: 'var(--brass)' } : undefined}

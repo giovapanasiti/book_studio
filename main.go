@@ -77,6 +77,8 @@ func appMenu(app *App) *menu.Menu {
 	})
 
 	view := m.AddSubmenu("View")
+	view.AddText("Focus Mode", keys.Combo("f", keys.CmdOrCtrlKey, keys.ShiftKey), emit("view-focus"))
+	view.AddSeparator()
 	view.AddText("Write", keys.CmdOrCtrl("1"), emit("view-write"))
 	view.AddText("Bible", keys.CmdOrCtrl("2"), emit("view-bible"))
 	view.AddText("Design", keys.CmdOrCtrl("3"), emit("view-design"))

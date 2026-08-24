@@ -45,7 +45,9 @@
     "pageColor": "#ffffff",
     "tocEnabled": true,
     "titlePageEnabled": true,
-    "chapterNumbering": true
+    "chapterNumbering": true,
+    "chapterLabel": "",
+    "tocTitle": ""
   },
   "cover": {
     "bgColor": "#233242",

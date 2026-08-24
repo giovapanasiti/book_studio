@@ -4,7 +4,7 @@
 #   makepkg -si
 #
 pkgname=book-studio
-pkgver=1.3.0
+pkgver=1.4.0
 pkgrel=1
 pkgdesc="Desktop studio to write, design and export books and magazines as PDF and ePub"
 arch=('x86_64')
