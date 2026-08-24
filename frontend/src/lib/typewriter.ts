@@ -64,64 +64,77 @@ function rand(spread: number): number {
   return 1 + (Math.random() * 2 - 1) * spread;
 }
 
+// Scheduling in the immediate past silences short sounds on some engines
+// (WebKitGTK): always give the renderer a small lead.
+const LEAD = 0.03;
+
+// Keep playing nodes referenced so they are not collected mid-sound.
+const live = new Set<AudioScheduledSourceNode>();
+function hold(src: AudioScheduledSourceNode) {
+  live.add(src);
+  src.onended = () => live.delete(src);
+}
+
 // noiseBurst plays filtered noise: the "clack" component of a keystroke.
 function noiseBurst(freq: number, q: number, gain: number, duration: number, when = 0) {
   if (!ctx || !master || !noiseBuffer) return;
-  const t = ctx.currentTime + when;
+  const t = ctx.currentTime + LEAD + when;
   const src = ctx.createBufferSource();
   src.buffer = noiseBuffer;
+  src.loop = true;
   src.playbackRate.value = rand(0.1);
   const filter = ctx.createBiquadFilter();
   filter.type = 'bandpass';
   filter.frequency.value = freq * rand(0.15);
   filter.Q.value = q;
   const g = ctx.createGain();
+  g.gain.value = 0;
   g.gain.setValueAtTime(gain * rand(0.2), t);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+  g.gain.setTargetAtTime(0, t + 0.005, duration / 4);
   src.connect(filter).connect(g).connect(master);
+  hold(src);
   src.start(t);
-  src.stop(t + duration + 0.02);
+  src.stop(t + duration + 0.1);
 }
 
 // thump plays a short pitched knock: the body of the key hitting bottom.
 function thump(freq: number, gain: number, duration: number, type: OscillatorType = 'triangle', when = 0) {
   if (!ctx || !master) return;
-  const t = ctx.currentTime + when;
+  const t = ctx.currentTime + LEAD + when;
   const osc = ctx.createOscillator();
   osc.type = type;
-  osc.frequency.setValueAtTime(freq * rand(0.08), t);
-  osc.frequency.exponentialRampToValueAtTime(Math.max(40, freq * 0.6), t + duration);
+  osc.frequency.value = freq * rand(0.08);
+  osc.frequency.setTargetAtTime(Math.max(40, freq * 0.6), t, duration / 2);
   const g = ctx.createGain();
+  g.gain.value = 0;
   g.gain.setValueAtTime(gain * rand(0.15), t);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+  g.gain.setTargetAtTime(0, t + 0.005, duration / 4);
   osc.connect(g).connect(master);
+  hold(osc);
   osc.start(t);
-  osc.stop(t + duration + 0.02);
+  osc.stop(t + duration + 0.1);
 }
 
 // ding is the carriage-return bell.
 function ding(freq: number, gain: number) {
   if (!ctx || !master) return;
-  const t = ctx.currentTime;
-  const osc = ctx.createOscillator();
-  osc.type = 'sine';
-  osc.frequency.value = freq;
-  const g = ctx.createGain();
-  g.gain.setValueAtTime(gain, t);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
-  osc.connect(g).connect(master);
-  osc.start(t);
-  osc.stop(t + 0.65);
-  // A faint overtone makes it ring like a real bell.
-  const o2 = ctx.createOscillator();
-  o2.type = 'sine';
-  o2.frequency.value = freq * 2.7;
-  const g2 = ctx.createGain();
-  g2.gain.setValueAtTime(gain * 0.3, t);
-  g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
-  o2.connect(g2).connect(master);
-  o2.start(t);
-  o2.stop(t + 0.4);
+  const t = ctx.currentTime + LEAD;
+  for (const [mult, g0, decay, stop] of [
+    [1, gain, 0.15, 0.7],
+    [2.7, gain * 0.3, 0.08, 0.45],
+  ] as const) {
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = freq * mult;
+    const g = ctx.createGain();
+    g.gain.value = 0;
+    g.gain.setValueAtTime(g0, t);
+    g.gain.setTargetAtTime(0, t + 0.01, decay);
+    osc.connect(g).connect(master);
+    hold(osc);
+    osc.start(t);
+    osc.stop(t + stop);
+  }
 }
 
 // warmUp creates (and resumes) the audio context ahead of the first key.

@@ -17,3 +17,8 @@ Her predecessors had left their marks in the logbook:
 > A lighthouse is not a building, her grandfather had written. It is an argument with the dark, renewed nightly.
 
 She intended to win the argument for another decade at least.
+
+she is just what i like
+but whe ehrnrnr dssdiopeukkrnndkdsljjkjjhbhjjjvvvvghgvth
+
+huiokgGiovanni dice che va tutto bene!
