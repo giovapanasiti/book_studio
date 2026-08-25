@@ -30,3 +30,6 @@ frontend/package.json.md5
 
 # stray go build output at repo root
 /book-studio
+
+# release artifacts
+/dist/

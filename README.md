@@ -72,6 +72,16 @@ Built with [Wails v2](https://wails.io) (Go backend) and React + TypeScript (fro
   NCX fallback, cover, stylesheet from your design settings, and all images.
 - **Native menu** — File (new, open, save, export), View (the four views) and Help.
 
+## Download
+
+Prebuilt packages for **macOS** (universal), **Windows**, **Debian/Ubuntu**
+(.deb) and **Linux** (portable tar.gz) are on the
+[releases page](https://github.com/giovapanasiti/book_studio/releases).
+
+Maintainers: `make release` builds the Linux, .deb and Windows artifacts;
+`make publish` tags the version, creates the GitHub release and uploads
+them; the macOS build is added by CI (`.github/workflows/release.yml`).
+
 ## Install on Arch Linux
 
 The repository contains a `PKGBUILD`. From the repository root:

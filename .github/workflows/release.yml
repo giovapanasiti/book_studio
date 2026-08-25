@@ -1,0 +1,48 @@
+# Builds the macOS app on a macOS runner (it cannot be cross-compiled from
+# Linux) and uploads it to the GitHub release that triggered the run.
+name: release-macos
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to attach the macOS build to (e.g. v1.4.0)
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Build universal app
+        run: wails build -platform darwin/universal
+
+      - name: Package
+        run: |
+          VERSION=$(sed -n 's/^pkgver=//p' PKGBUILD)
+          ditto -c -k --keepParent "build/bin/book-studio.app" "book-studio_${VERSION}_macos_universal.zip"
+          echo "ASSET=book-studio_${VERSION}_macos_universal.zip" >> "$GITHUB_ENV"
+
+      - name: Upload to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ github.event.release.tag_name || inputs.tag }}"
+          gh release upload "$TAG" "$ASSET" --clobber
