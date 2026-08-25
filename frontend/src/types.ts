@@ -344,15 +344,36 @@ export const CHAPTER_STATUSES: [string, string][] = [
 ];
 
 // Page sizes in millimeters; keep in sync with the Go side.
-export const PAGE_SIZES: Record<string, { w: number; h: number; label: string }> = {
-  Trade: { w: 152.4, h: 228.6, label: 'Trade 6×9″' },
-  Digest: { w: 139.7, h: 215.9, label: 'Digest 5.5×8.5″' },
-  A5: { w: 148, h: 210, label: 'A5' },
-  A4: { w: 210, h: 297, label: 'A4' },
-  Letter: { w: 215.9, h: 279.4, label: 'US Letter' },
-  Magazine: { w: 209.55, h: 273.05, label: 'Magazine 8.25×10.75″' },
-  Square: { w: 210, h: 210, label: 'Square 210 mm' },
+// group 'kdp' entries are the trim sizes Amazon KDP accepts for paperbacks.
+export const PAGE_SIZES: Record<string, { w: number; h: number; label: string; group: 'standard' | 'kdp' }> = {
+  Trade: { w: 152.4, h: 228.6, label: 'Trade 6×9″ (KDP)', group: 'standard' },
+  Digest: { w: 139.7, h: 215.9, label: 'Digest 5.5×8.5″ (KDP)', group: 'standard' },
+  A5: { w: 148, h: 210, label: 'A5', group: 'standard' },
+  A4: { w: 210, h: 297, label: 'A4', group: 'standard' },
+  Letter: { w: 215.9, h: 279.4, label: 'US Letter 8.5×11″ (KDP)', group: 'standard' },
+  Magazine: { w: 209.55, h: 273.05, label: 'Magazine 8.25×10.75″', group: 'standard' },
+  Square: { w: 210, h: 210, label: 'Square 210 mm', group: 'standard' },
+  'KDP-5x8': { w: 127, h: 203.2, label: '5×8″', group: 'kdp' },
+  'KDP-5.06x7.81': { w: 128.5, h: 198.4, label: '5.06×7.81″', group: 'kdp' },
+  'KDP-5.25x8': { w: 133.35, h: 203.2, label: '5.25×8″', group: 'kdp' },
+  'KDP-5.5x8.5': { w: 139.7, h: 215.9, label: '5.5×8.5″', group: 'kdp' },
+  'KDP-6x9': { w: 152.4, h: 228.6, label: '6×9″ (most common)', group: 'kdp' },
+  'KDP-6.14x9.21': { w: 156, h: 234, label: '6.14×9.21″', group: 'kdp' },
+  'KDP-6.69x9.61': { w: 169.9, h: 244.1, label: '6.69×9.61″', group: 'kdp' },
+  'KDP-7x10': { w: 177.8, h: 254, label: '7×10″', group: 'kdp' },
+  'KDP-7.44x9.69': { w: 189, h: 246.1, label: '7.44×9.69″', group: 'kdp' },
+  'KDP-7.5x9.25': { w: 190.5, h: 234.95, label: '7.5×9.25″', group: 'kdp' },
+  'KDP-8x10': { w: 203.2, h: 254, label: '8×10″', group: 'kdp' },
+  'KDP-8.25x6': { w: 209.55, h: 152.4, label: '8.25×6″ (landscape)', group: 'kdp' },
+  'KDP-8.25x8.25': { w: 209.55, h: 209.55, label: '8.25×8.25″ (square)', group: 'kdp' },
+  'KDP-8.5x8.5': { w: 215.9, h: 215.9, label: '8.5×8.5″ (square)', group: 'kdp' },
+  'KDP-8.5x11': { w: 215.9, h: 279.4, label: '8.5×11″', group: 'kdp' },
 };
+
+// isKdpTrim: sizes Amazon KDP accepts (KDP-* plus the standard aliases).
+export function isKdpTrim(name: string): boolean {
+  return name.startsWith('KDP-') || name === 'Trade' || name === 'Digest' || name === 'Letter';
+}
 
 export const MM_TO_PX = 96 / 25.4;
 

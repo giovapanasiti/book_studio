@@ -574,6 +574,16 @@ func (a *App) ExportPDF() (string, error) {
 	return target, nil
 }
 
+// CountPDFPages typesets the open book in memory and returns its page count.
+func (a *App) CountPDFPages() (int, error) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	if a.book == nil || a.projectDir == "" {
+		return 0, fmt.Errorf("no project is open")
+	}
+	return CountPages(a.projectDir, a.book)
+}
+
 // RevealInFolder opens the system file manager at the given path.
 func (a *App) RevealInFolder(path string) {
 	runtime.BrowserOpenURL(a.ctx, "file://"+filepath.Dir(path))

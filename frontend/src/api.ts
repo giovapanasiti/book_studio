@@ -29,6 +29,7 @@ export const api = {
   saveEditedImage: (name: string, dataURL: string): Promise<string> => App.SaveEditedImage(name, dataURL),
   exportPDF: (): Promise<string> => App.ExportPDF(),
   exportEPUB: (): Promise<string> => App.ExportEPUB(),
+  countPdfPages: (): Promise<number> => App.CountPDFPages(),
   listSystemFonts: (): Promise<SystemFont[]> => App.ListSystemFonts().then((r) => (r as SystemFont[]) ?? []),
   saveCoverRender: (dataURL: string): Promise<void> => App.SaveCoverRender(dataURL),
 };

@@ -480,7 +480,17 @@ function Studio() {
               }}
             />
           )}
-          {view === 'design' && <DesignView book={book} onBook={updateBook} onStyles={updateStyles} />}
+          {view === 'design' && (
+            <DesignView
+              book={book}
+              onBook={updateBook}
+              onStyles={updateStyles}
+              onCountPages={async () => {
+                await flushSaves();
+                return api.countPdfPages();
+              }}
+            />
+          )}
           {view === 'cover' && (
             <CoverView book={book} images={images} onCover={updateCover} onImagesChanged={() => void refreshImages()} />
           )}

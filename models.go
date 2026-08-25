@@ -203,22 +203,47 @@ func TocTitleFor(b *Book) string {
 }
 
 // PageSizeMM returns width and height in millimeters for a page size name.
+// The KDP-* names are the trim sizes Amazon KDP accepts for paperbacks.
 func PageSizeMM(name string) (float64, float64) {
 	switch name {
 	case "A4":
 		return 210, 297
 	case "A5":
 		return 148, 210
-	case "Digest":
+	case "Digest", "KDP-5.5x8.5":
 		return 139.7, 215.9 // 5.5 x 8.5 in
-	case "Trade":
+	case "Trade", "KDP-6x9":
 		return 152.4, 228.6 // 6 x 9 in
-	case "Letter":
+	case "Letter", "KDP-8.5x11":
 		return 215.9, 279.4
 	case "Magazine":
 		return 209.55, 273.05 // 8.25 x 10.75 in
 	case "Square":
 		return 210, 210
+	case "KDP-5x8":
+		return 127, 203.2
+	case "KDP-5.06x7.81":
+		return 128.5, 198.4
+	case "KDP-5.25x8":
+		return 133.35, 203.2
+	case "KDP-6.14x9.21":
+		return 156, 234
+	case "KDP-6.69x9.61":
+		return 169.9, 244.1
+	case "KDP-7x10":
+		return 177.8, 254
+	case "KDP-7.44x9.69":
+		return 189, 246.1
+	case "KDP-7.5x9.25":
+		return 190.5, 234.95
+	case "KDP-8x10":
+		return 203.2, 254
+	case "KDP-8.25x6":
+		return 209.55, 152.4
+	case "KDP-8.25x8.25":
+		return 209.55, 209.55
+	case "KDP-8.5x8.5":
+		return 215.9, 215.9
 	default:
 		return 152.4, 228.6
 	}

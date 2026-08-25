@@ -1029,6 +1029,17 @@ func (e *engine) render() error {
 	return e.pdf.Error()
 }
 
+// CountPages typesets the book without writing it and returns the total
+// page count. Used by the KDP margin helper: Amazon's required gutter
+// depends on how many pages the finished book has.
+func CountPages(projectDir string, b *Book) (int, error) {
+	e := newEngine(projectDir, b)
+	if err := e.render(); err != nil {
+		return 0, err
+	}
+	return e.pdf.PageNo(), nil
+}
+
 // WritePDF typesets the whole book and writes it to the target path.
 func WritePDF(projectDir string, b *Book, target string) error {
 	// Pass 1: collect chapter folio numbers.
