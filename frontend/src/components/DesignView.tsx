@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Book, Styles } from '../types';
-import { PAGE_SIZES, MM_TO_PX, fontStack, BOOK_LANGUAGES, locChapter, locTOC } from '../types';
+import { PAGE_SIZES, KDP_PAPERS, MM_TO_PX, fontStack, BOOK_LANGUAGES, locChapter, locTOC } from '../types';
 import { checkKdp, kdpMargins, requiredGutterMM } from '../lib/kdp';
 import type { KdpIssue } from '../lib/kdp';
 import { useToast } from './Toast';
@@ -45,25 +45,56 @@ export function DesignView({ book, onBook, onStyles, onCountPages }: Props) {
   const pageH = size.h * MM_TO_PX * 0.62;
   const inches = (mm: number) => (mm / 25.4).toFixed(2);
 
-  const runKdpCheck = async () => {
+  const sRef = useRef(s);
+  sRef.current = s;
+  const adaptBusy = useRef(false);
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  const marginsDiffer = (a: Styles, patch: Partial<Styles>) =>
+    (['marginInner', 'marginOuter', 'marginTop', 'marginBottom'] as const).some(
+      (k) => Math.abs((patch[k] ?? a[k]) - a[k]) > 0.01
+    );
+
+  // runKdp typesets the book; with adapt=true it also raises the margins to
+  // Amazon's requirements and re-typesets until the page count settles.
+  const runKdp = async (adapt: boolean) => {
+    if (adaptBusy.current) return;
+    adaptBusy.current = true;
     setChecking(true);
     try {
-      const pages = await onCountPages();
+      let pages = await onCountPages();
+      if (adapt) {
+        for (let i = 0; i < 2; i++) {
+          const cur = sRef.current;
+          const patch = kdpMargins(cur, pages);
+          if (!marginsDiffer(cur, patch)) break;
+          onStyles(patch);
+          await sleep(250); // let the state update land before re-typesetting
+          pages = await onCountPages();
+        }
+      }
       setKdpPages(pages);
-      setKdpIssues(checkKdp(s, pages));
+      setKdpIssues(checkKdp(sRef.current, pages));
     } catch (e) {
-      toast('error', 'Could not count pages', String(e));
+      toast('error', 'Could not typeset the book', String(e));
     } finally {
       setChecking(false);
+      adaptBusy.current = false;
     }
   };
 
+  // Selecting a KDP trim (or changing paper, header or folio settings)
+  // adapts the whole book automatically, unless the author opts out.
+  useEffect(() => {
+    if (tab !== 'pdf' || s.kdpManual || !s.pageSize.startsWith('KDP-')) return;
+    const t = window.setTimeout(() => void runKdp(true), 900);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, s.pageSize, s.paper, s.showHeader, s.showPageNumbers, s.kdpManual,
+      s.marginInner, s.marginOuter, s.marginTop, s.marginBottom, s.bodySize, s.lineHeight]);
+
   const applyKdpMargins = () => {
-    if (kdpPages === null) return;
-    onStyles(kdpMargins(s, kdpPages));
-    // Margins changed: page count can shift, so re-check against the result.
-    setKdpIssues(null);
-    toast('success', 'KDP margins applied', 'Run the check again to confirm the final page count');
+    void runKdp(true);
   };
 
   const num = (label: string, key: keyof Styles, min: number, max: number, step = 1, unit = '') => (
@@ -226,23 +257,46 @@ export function DesignView({ book, onBook, onStyles, onCountPages }: Props) {
             </div>
 
             <div className="panel-section">
-              <div className="panel-title">Amazon KDP check</div>
+              <div className="panel-title">Amazon KDP</div>
+              <div className="field-row">
+                <label>Paper &amp; ink</label>
+                <select
+                  className="select-input grow"
+                  value={s.paper || 'white'}
+                  onChange={(e) => onStyles({ paper: e.target.value })}
+                >
+                  {KDP_PAPERS.map(([k, label]) => (
+                    <option key={k} value={k}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <label className="check-row">
+                <input
+                  type="checkbox"
+                  checked={!s.kdpManual}
+                  onChange={(e) => onStyles({ kdpManual: !e.target.checked })}
+                />
+                Adapt margins to KDP automatically
+              </label>
               <p className="empty-hint" style={{ textAlign: 'left', padding: '0 0 10px' }}>
-                KDP's required inside margin grows with the page count
-                (0.375″ up to 150 pages, then 0.5″, 0.625″, 0.75″, 0.875″).
-                The check typesets your book and verifies every rule.
+                On a KDP trim size the book is typeset and its margins raised
+                to Amazon's rules whenever something changes: the required
+                inside margin grows with the page count (0.375″ up to 150
+                pages, then 0.5″, 0.625″, 0.75″, 0.875″).
               </p>
               <div className="field-row">
-                <button className="btn btn-sm" disabled={checking} onClick={() => void runKdpCheck()}>
-                  {checking ? 'Typesetting…' : 'Check for KDP'}
+                <button className="btn btn-sm" disabled={checking} onClick={() => void runKdp(!s.kdpManual)}>
+                  {checking ? 'Typesetting…' : s.kdpManual ? 'Check for KDP' : 'Re-check now'}
                 </button>
-                {kdpPages !== null && (
+                {kdpPages !== null && !checking && (
                   <span className="range-val" style={{ textAlign: 'left', minWidth: 0 }}>
                     {kdpPages} pages · gutter ≥ {(requiredGutterMM(kdpPages)).toFixed(1)} mm
                   </span>
                 )}
               </div>
-              {kdpIssues && (
+              {kdpIssues && !checking && (
                 <>
                   {kdpIssues.map((issue, i) => (
                     <div key={i} className="field-row" style={{ marginBottom: 4 }}>
@@ -252,7 +306,7 @@ export function DesignView({ book, onBook, onStyles, onCountPages }: Props) {
                       <span style={{ color: 'var(--muted)', fontSize: 12 }}>{issue.text}</span>
                     </div>
                   ))}
-                  {kdpIssues.some((i) => !i.ok) && (
+                  {kdpIssues.some((i) => !i.ok) && s.kdpManual && (
                     <div className="field-row" style={{ marginTop: 6 }}>
                       <button className="btn btn-sm btn-primary" onClick={applyKdpMargins}>
                         Apply KDP margins

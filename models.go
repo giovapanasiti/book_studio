@@ -48,6 +48,10 @@ type Styles struct {
 	ChapterNumbering bool    `json:"chapterNumbering"`
 	ChapterLabel     string  `json:"chapterLabel"` // "" = by language ("Capitolo", …)
 	TocTitle         string  `json:"tocTitle"`     // "" = by language ("Indice", …)
+	// KDP print options: paper/ink type (page-count limits differ) and an
+	// opt-out for the automatic margin adaptation on KDP trim sizes.
+	Paper     string `json:"paper,omitempty"` // white | cream | color-standard | color-premium
+	KdpManual bool   `json:"kdpManual,omitempty"`
 }
 
 // CoverText is one text element on the cover.
@@ -244,6 +248,8 @@ func PageSizeMM(name string) (float64, float64) {
 		return 209.55, 209.55
 	case "KDP-8.5x8.5":
 		return 215.9, 215.9
+	case "KDP-8.27x11.69":
+		return 210.1, 296.9
 	default:
 		return 152.4, 228.6
 	}

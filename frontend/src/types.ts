@@ -53,6 +53,8 @@ export interface Styles {
   chapterNumbering: boolean;
   chapterLabel: string;
   tocTitle: string;
+  paper?: string;
+  kdpManual?: boolean;
 }
 
 export interface CoverText {
@@ -353,22 +355,32 @@ export const PAGE_SIZES: Record<string, { w: number; h: number; label: string; g
   Letter: { w: 215.9, h: 279.4, label: 'US Letter 8.5×11″ (KDP)', group: 'standard' },
   Magazine: { w: 209.55, h: 273.05, label: 'Magazine 8.25×10.75″', group: 'standard' },
   Square: { w: 210, h: 210, label: 'Square 210 mm', group: 'standard' },
-  'KDP-5x8': { w: 127, h: 203.2, label: '5×8″', group: 'kdp' },
-  'KDP-5.06x7.81': { w: 128.5, h: 198.4, label: '5.06×7.81″', group: 'kdp' },
-  'KDP-5.25x8': { w: 133.35, h: 203.2, label: '5.25×8″', group: 'kdp' },
-  'KDP-5.5x8.5': { w: 139.7, h: 215.9, label: '5.5×8.5″', group: 'kdp' },
-  'KDP-6x9': { w: 152.4, h: 228.6, label: '6×9″ (most common)', group: 'kdp' },
-  'KDP-6.14x9.21': { w: 156, h: 234, label: '6.14×9.21″', group: 'kdp' },
-  'KDP-6.69x9.61': { w: 169.9, h: 244.1, label: '6.69×9.61″', group: 'kdp' },
-  'KDP-7x10': { w: 177.8, h: 254, label: '7×10″', group: 'kdp' },
-  'KDP-7.44x9.69': { w: 189, h: 246.1, label: '7.44×9.69″', group: 'kdp' },
-  'KDP-7.5x9.25': { w: 190.5, h: 234.95, label: '7.5×9.25″', group: 'kdp' },
-  'KDP-8x10': { w: 203.2, h: 254, label: '8×10″', group: 'kdp' },
-  'KDP-8.25x6': { w: 209.55, h: 152.4, label: '8.25×6″ (landscape)', group: 'kdp' },
-  'KDP-8.25x8.25': { w: 209.55, h: 209.55, label: '8.25×8.25″ (square)', group: 'kdp' },
-  'KDP-8.5x8.5': { w: 215.9, h: 215.9, label: '8.5×8.5″ (square)', group: 'kdp' },
-  'KDP-8.5x11': { w: 215.9, h: 279.4, label: '8.5×11″', group: 'kdp' },
+  'KDP-5x8': { w: 127, h: 203.2, label: '5" x 8" (12.7 x 20.32 cm)', group: 'kdp' },
+  'KDP-5.06x7.81': { w: 128.5, h: 198.4, label: '5.06" x 7.81" (12.85 x 19.84 cm)', group: 'kdp' },
+  'KDP-5.25x8': { w: 133.35, h: 203.2, label: '5.25" x 8" (13.34 x 20.32 cm)', group: 'kdp' },
+  'KDP-5.5x8.5': { w: 139.7, h: 215.9, label: '5.5" x 8.5" (13.97 x 21.59 cm)', group: 'kdp' },
+  'KDP-6x9': { w: 152.4, h: 228.6, label: '6" x 9" (15.24 x 22.86 cm) — most common', group: 'kdp' },
+  'KDP-6.14x9.21': { w: 156, h: 234, label: '6.14" x 9.21" (15.6 x 23.39 cm)', group: 'kdp' },
+  'KDP-6.69x9.61': { w: 169.9, h: 244.1, label: '6.69" x 9.61" (16.99 x 24.41 cm)', group: 'kdp' },
+  'KDP-7x10': { w: 177.8, h: 254, label: '7" x 10" (17.78 x 25.4 cm)', group: 'kdp' },
+  'KDP-7.44x9.69': { w: 189, h: 246.1, label: '7.44" x 9.69" (18.9 x 24.61 cm)', group: 'kdp' },
+  'KDP-7.5x9.25': { w: 190.5, h: 234.95, label: '7.5" x 9.25" (19.05 x 23.5 cm)', group: 'kdp' },
+  'KDP-8x10': { w: 203.2, h: 254, label: '8" x 10" (20.32 x 25.4 cm)', group: 'kdp' },
+  'KDP-8.25x6': { w: 209.55, h: 152.4, label: '8.25" x 6" (20.96 x 15.24 cm) — landscape', group: 'kdp' },
+  'KDP-8.25x8.25': { w: 209.55, h: 209.55, label: '8.25" x 8.25" (20.96 x 20.96 cm) — square', group: 'kdp' },
+  'KDP-8.27x11.69': { w: 210.1, h: 296.9, label: '8.27" x 11.69" (21.01 x 29.69 cm) — A4', group: 'kdp' },
+  'KDP-8.5x8.5': { w: 215.9, h: 215.9, label: '8.5" x 8.5" (21.59 x 21.59 cm) — square', group: 'kdp' },
+  'KDP-8.5x11': { w: 215.9, h: 279.4, label: '8.5" x 11" (21.59 x 27.94 cm)', group: 'kdp' },
 };
+
+// KDP paper/ink types with their allowed page counts.
+export const KDP_PAPERS: [string, string, number, number][] = [
+  // key, label, min pages, max pages
+  ['white', 'Black ink, white paper', 24, 828],
+  ['cream', 'Black ink, cream paper', 24, 776],
+  ['color-standard', 'Standard color, white paper', 72, 600],
+  ['color-premium', 'Premium color, white paper', 24, 828],
+];
 
 // isKdpTrim: sizes Amazon KDP accepts (KDP-* plus the standard aliases).
 export function isKdpTrim(name: string): boolean {

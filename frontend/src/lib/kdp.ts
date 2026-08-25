@@ -4,7 +4,7 @@
 // Source: KDP "Set trim size, bleed, and margins" specifications.
 
 import type { Styles } from '../types';
-import { isKdpTrim } from '../types';
+import { isKdpTrim, KDP_PAPERS } from '../types';
 
 const IN = 25.4; // mm
 
@@ -18,7 +18,12 @@ export function requiredGutterMM(pages: number): number {
 }
 
 export const MIN_OUTSIDE_MM = 0.25 * IN; // outside, top and bottom, no bleed
-export const MAX_KDP_PAGES = 828;
+
+// pageLimits returns [min, max] pages for a KDP paper/ink type.
+export function pageLimits(paper: string | undefined): [number, number] {
+  const p = KDP_PAPERS.find(([k]) => k === (paper || 'white'));
+  return p ? [p[2], p[3]] : [24, 828];
+}
 
 export interface KdpIssue {
   ok: boolean;
@@ -40,10 +45,16 @@ export function checkKdp(styles: Styles, pages: number): KdpIssue[] {
         ? 'Trim size is a KDP size'
         : 'The page size is not one of the KDP trim sizes',
     },
-    {
-      ok: pages <= MAX_KDP_PAGES,
-      text: pages <= MAX_KDP_PAGES ? `${pages} pages (KDP allows up to ${MAX_KDP_PAGES})` : `${pages} pages — over KDP's ${MAX_KDP_PAGES}-page maximum`,
-    },
+    (() => {
+      const [minP, maxP] = pageLimits(styles.paper);
+      const ok = pages >= minP && pages <= maxP;
+      return {
+        ok,
+        text: ok
+          ? `${pages} pages (this paper allows ${minP}–${maxP})`
+          : `${pages} pages — this paper type allows ${minP} to ${maxP}`,
+      };
+    })(),
     {
       ok: styles.marginInner >= gutter - 0.05,
       text: `Inside margin ${r1(styles.marginInner)} mm (needs ≥ ${r1(gutter)} mm at ${pages} pages)`,
